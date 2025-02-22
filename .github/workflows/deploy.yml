@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # or your default branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # or your Node.js version
+
+      - name: Install dependencies
+        run: npm install # or yarn install
+
+      - name: Build
+        run: |
+            GITHUB_REPOSITORY=$GITHUB_REPOSITORY npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          clean: true
+    ```
+
+**3. Key Checks:**
+
+* **Case Sensitivity:**
+    * GitHub URLs are case-sensitive. Ensure that the repository name in the `base` URL matches the actual repository name on GitHub exactly (including capitalization).
+* **Rebuild and Redeploy:**
+    * After making changes to `vite.config.ts`, you **must** rebuild your project (`npm run build` or `yarn build`) and then push the changes to your GitHub repository.
+    * Then, github actions will run, and redeploy your website.
+* **Index.html verification:**
+    * After the build is complete, verify the contents of the index.html file located in the dist folder. Make sure the script tags are pointing to the correct location.
+* **GitHub Pages Settings:**
+    * Confirm in your repository's "Settings" -> "Pages" that the source is set to "GitHub Actions".
+* **Browser Cache:**
+    * Clear your browser's cache or try incognito mode.
+
+**Troubleshooting Steps if it Still Doesn't Work:**
+
+1.  **Local Build Verification:**
+    * After running `npm run build`, open the `dist/index.html` file in your browser directly (by double-clicking it). If it works locally, the build process is likely correct. If it doesn't work locally, then the problem is with your build process.
+2.  **GitHub Actions Logs:**
+    * Carefully review the logs of your GitHub Actions workflow. Look for any errors or warnings during the build or deployment steps.
+3.  **Network Tab in Browser Developer Tools:**
+    * Open your browser's developer tools (F12) and go to the "Network" tab. Reload the page. Pay close attention to the URLs of the requests and any 404 errors. This will help you pinpoint exactly which files are not being found.
+
+By systematically working through these steps, you should be able to get your application deployed correctly.
